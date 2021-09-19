@@ -594,7 +594,7 @@ int ofApp::getNextEmptyMove(){
 	return(-1);
 }
 
-/*	given a side (as an int), fill sidePiecesBuffer[] with ones(1) where there are pieces that can move */
+/*	given a side (as an int), fill piecesCanMove[] with ones(1) where there are pieces that can move */
 void ofApp::fillPSBuffer(int side){
 	int flag=0;
 	for (int i=0; i<64; i++){
@@ -604,12 +604,12 @@ void ofApp::fillPSBuffer(int side){
 			getPossibleMoves(i);
 			for (int j=0; j<64; j++){
 				if (returnArray[j]==1){
-					flag=1;
+					flag=1;															// OPTIMIZE?
 					break;
 				}
 			}
 			if (flag){
-				sidePiecesBuffer[i]=1;
+				piecesCanMove[i]=1;
 			}
 		}
 	}
@@ -622,8 +622,8 @@ void ofApp::fillMoveset(int side){
 	clearMoveset();
 	fillPSBuffer(side);
 	for (int i=0; i<64; i++){
-		if (sidePiecesBuffer[i]==1){
-			getPossibleMoves(i);
+		if (piecesCanMove[i]==1){
+			getPossibleMoves(i);													// THIS CAN BE OPTIMIZED TOO
 			for (int j=0; j<64; j++){
 				if (returnArray[j]==1){
 					Moveset[getNextEmptyMove()].start_square=*sqr(i);
@@ -640,7 +640,7 @@ void ofApp::fillMoveset(int side){
 /*	reset the buffer back to all 0's */
 void ofApp::clearPSBuffer(){
 	for (int i=0;i<64;i++){
-		sidePiecesBuffer[i]=0;
+		piecesCanMove[i]=0;
 	}
 }
 
@@ -658,7 +658,7 @@ void ofApp::pickRandFromPSBuffer(){
 	int randomIndex=-1;
 	int count=0;
 	for (int i=0;i<64;i++){
-		if (sidePiecesBuffer[i]==1){
+		if (piecesCanMove[i]==1){
 			count++;
 			if ((int)ofRandom(count)==0){
 				randomIndex=i;

@@ -20,7 +20,7 @@ typedef struct {
 typedef struct {
 	Square start_square;
 	Square end_square;
-	int is_empty;
+	int is_empty;	// not the square, but the actual index in the moveset array
 } Move;
 
 
@@ -106,7 +106,7 @@ class ofApp : public ofBaseApp{
 
 		int returnArray[64] 		= {0};	// filled 8x8, 1 where possible move, reset by clearSelection()
 		int storageBuffer1[64] 		= {0};	// for use in the checkmate function ONLY
-		int sidePiecesBuffer[64] 	= {0};
+		int piecesCanMove[64] 	= {0};
 		Move Moveset[200];		// filled with a list of possible moves
 		Square Squares[64];
 };

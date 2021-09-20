@@ -34,6 +34,7 @@ class ofApp : public ofBaseApp{
 		void loadImages();
 		void placePieces();
 		void placeMoveIndicator();
+		void updateState();	/* update the state of the board by calling the draw functions */
 		void getPossibleMoves(int index);
 		void highlight();	/* given the returnArray, mark the Squares array accordingly */
 		void recurs(int index, int originalColor, int xdev, int ydev);
@@ -47,7 +48,7 @@ class ofApp : public ofBaseApp{
 		
 		/* GAMEPLAY FUNCTIONS */
 		int getNextEmptyMove();
-		void fillPSBuffer(int side);	// pieces side buffer
+		void fillPCMBuffer(int side);	// pieces side buffer
 		void fillMoveset(int side);
 		void clearPSBuffer();
 		void clearMoveset();
@@ -91,7 +92,7 @@ class ofApp : public ofBaseApp{
 		int squareSize = 60;
 		int squareSpacing = 6;
 		int moveablePiece = 0;
-		ofVec2f nextRight;	/* vector representing the spacing between squares, used for calculation */
+		ofVec2f nextRight;	/* vector repres enting the spacing between squares, used for calculation */
 		ofVec2f nextAbove;
 		bool whiteToMove = true;
 
@@ -109,4 +110,5 @@ class ofApp : public ofBaseApp{
 		int piecesCanMove[64] 	= {0};
 		Move Moveset[200];		// filled with a list of possible moves
 		Square Squares[64];
+		Square squareBuffer[64];
 };

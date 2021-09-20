@@ -211,12 +211,20 @@ void ofApp::placeMoveIndicator(){
 	}
 }
 
-/* given an index from the Squares array, return an array of ints. */
+/* update the board state by calling every draw function */
+void ofApp::updateState(){
+	drawBoardNoPieces();
+	placePieces();
+	highlight();
+	placeMoveIndicator();
+}
+
+/* given an index from the Squares array, updates the returnArray. */
 /* returned array is 1 if possible move, 0 if not */
 /* returns to returnArray */
 void ofApp::getPossibleMoves(int index){
-	Square *cSquare = &Squares[index];
-	if (cSquare->has_piece == 0) {return;} // if empty square, exit
+	Square *cSquare = &Squares[index];		// cSquare is a Square reference. Access this data by cSquare->type
+	if (cSquare->has_piece == 0) {return;} 	// if empty square, exit
 	else if (cSquare->piece_color == 1){	// if the square has a white piece
 		switch (cSquare->piece_type){
 			case 'p':
@@ -372,12 +380,15 @@ void ofApp::getPossibleMoves(int index){
 				break;
 		}
 	}
-	/* this part is 'check' checking. */
+	/* 	this part is 'check' checking.
+		for every square that is one(1) in the return array (ie it is a possible move)
+		simulate the move. If that move results in a check, remove it from the list of possible moves (mark it zero(0) on return array)
+	 */
+	int savedColor = cSquare->piece_color;
 	for (int i=0; i<64; i++){
 		if (returnArray[i]==1){
 			storageSquare = Squares[i];
 			char savedType = cSquare->piece_type;
-			int savedColor = cSquare->piece_color;
 			cSquare->piece_type=' ';
 			cSquare->has_piece=0;
 			sqr(i)->has_piece=1;
@@ -427,6 +438,7 @@ int ofApp::nonrecursiveKingCheck(int index, int xdev, int ydev, char checkFor){
 }
 
 /* given an index from the Squares array, an original color, and a transform, keep moving in that direction until you can't anymore */
+/* mark the return array as 1 if it finds a piece of the opposite color */
 void ofApp::recurs(int index, int originalColor, int xdev, int ydev){
 	if (takeable(index,originalColor,xdev,ydev)==1){
 		returnArray[transformBy(index,xdev,ydev)] = 1;
@@ -455,7 +467,7 @@ void ofApp::clearSelection(){
 /* 	Remove the item at index from Squares array, move to the selected square.
 	Also includes some castling handling/error checking */
 void ofApp::moveTo(int index, int x, int y){
-	/* castling handling */
+	/* castling handling, if castling, move the rooks too. */
 	/* kingside white */
 	if (sqr(index)->piece_type=='k' && x==6 && index==4){
 		wk_flag=whr_flag=1;
@@ -490,7 +502,8 @@ void ofApp::moveTo(int index, int x, int y){
 	Squares[index].has_piece = false;
 	Squares[index].piece_type = ' ';
 
-	/* en poopoo, holy hell */
+	/* en pipi, holy hell */
+	/* If the square behind the en-passant square if full of opp. color pawn (en passant happpend), remove the taken pawn */
 	if (sqr(getSelf(ep_flag,2))->piece_type=='p' && sqr(getSelf(ep_flag,2))->piece_color==Squares[index].piece_color){
 		sqr(getSelf(ep_flag,3))->piece_type=' ';
 		sqr(getSelf(ep_flag,3))->has_piece=0;
@@ -500,6 +513,7 @@ void ofApp::moveTo(int index, int x, int y){
 		sqr(getSelf(ep_flag,4))->has_piece=0;
 	}
 	ep_flag=-2;
+	/* set ep_flag if double pawn move */
 	if (y==3 && index>7 && index<16){	// double pawn move white
 		if ((sqr(getSelf(x+1,y))->piece_color==0)&&(sqr(getSelf(x+1,y))->piece_type=='p')){	ep_flag=x;	}
 		if ((sqr(getSelf(x-1,y))->piece_color==0)&&(sqr(getSelf(x-1,y))->piece_type=='p')){	ep_flag=x;	}
@@ -565,20 +579,8 @@ int ofApp::inCheck(int side){
 
 /* takes color, returns 1 if mate */
 int ofApp::checkmate(int side){
-	int returnInt=0;
-	for (int i=0; i<64; i++){	storageBuffer1[i] = returnArray[i];	}
-	clearSelection();
-	for (int i=0; i<64; i++){
-		if (sqr(i)->piece_color==side && sqr(i)->has_piece==1){
-			getPossibleMoves(i);
-		}
-	}
-	for (int i=0; i<64; i++){
-		if (returnArray[i]==1){	returnInt+=1;	}
-	}
-	clearSelection();
-	for (int i=0; i<64; i++){	returnArray[i] = storageBuffer1[i];	}
-	return(returnInt==0);
+	fillMoveset(side);	
+	return(getNextEmptyMove()==0);
 }
 
 /* ----------------------------------	GAMEPLAY FUNCTIONS		----------------------------- */
@@ -595,7 +597,7 @@ int ofApp::getNextEmptyMove(){
 }
 
 /*	given a side (as an int), fill piecesCanMove[] with ones(1) where there are pieces that can move */
-void ofApp::fillPSBuffer(int side){
+void ofApp::fillPCMBuffer(int side){
 	int flag=0;
 	for (int i=0; i<64; i++){
 		flag=0;
@@ -604,7 +606,7 @@ void ofApp::fillPSBuffer(int side){
 			getPossibleMoves(i);
 			for (int j=0; j<64; j++){
 				if (returnArray[j]==1){
-					flag=1;															// OPTIMIZE?
+					flag=1;	
 					break;
 				}
 			}
@@ -616,14 +618,17 @@ void ofApp::fillPSBuffer(int side){
 	clearSelection();
 }
 
+/*	clear pcm buffer, selection, moveset, then fill moveset
+	at the end, clear selection and moveset */
 void ofApp::fillMoveset(int side){
+	for (int i=0; i<64; i++){	storageBuffer1[i] = returnArray[i];	}
 	clearSelection();
 	clearPSBuffer();
 	clearMoveset();
-	fillPSBuffer(side);
+	fillPCMBuffer(side);
 	for (int i=0; i<64; i++){
 		if (piecesCanMove[i]==1){
-			getPossibleMoves(i);													// THIS CAN BE OPTIMIZED TOO
+			getPossibleMoves(i);
 			for (int j=0; j<64; j++){
 				if (returnArray[j]==1){
 					Moveset[getNextEmptyMove()].start_square=*sqr(i);
@@ -635,6 +640,7 @@ void ofApp::fillMoveset(int side){
 		}
 	}
 	clearPSBuffer();
+	for (int i=0; i<64; i++){	returnArray[i] = storageBuffer1[i];	}
 }
 
 /*	reset the buffer back to all 0's */
@@ -653,7 +659,8 @@ void ofApp::clearMoveset(){
 	}
 }
 
-/* grab a random index from the PSBuffer, and perform GetPossibleMoves on it. Returns -1 if there are none to choose from */
+/*	This doesn't need to be used... Candidate for deletion
+//	grab a random index from the PSBuffer, and perform GetPossibleMoves on it. Returns -1 if there are none to choose from (which shouldn't happen)
 void ofApp::pickRandFromPSBuffer(){
 	int randomIndex=-1;
 	int count=0;
@@ -672,13 +679,15 @@ void ofApp::pickRandFromPSBuffer(){
 	getPossibleMoves(randomIndex);
 }
 
-/* first clear the psbuffer, then fill the psbuffer given the side, then run the normal pick random code */
+//	first clear the psbuffer, then fill the psbuffer given the side, then run the normal pick random code
 void ofApp::pickRandFromPSBuffer(int side){
 	clearPSBuffer();
-	fillPSBuffer(side);
+	fillPCMBuffer(side);
 	pickRandFromPSBuffer();
 }
+*/
 
+/* grab a random move from the moveset, return that index (as an int) */
 int ofApp::pickRandFromMoveset(){
 	int randomIndex=-1;
 	int count=0;
@@ -693,10 +702,11 @@ int ofApp::pickRandFromMoveset(){
 
 /* console/debugging function. Prints the contents of the Moveset array to the screen in (x,y) pairs */
 void ofApp::printMoveset(){
+	fillMoveset(whiteToMove);
 	for (int i=0;i<200;i++){
 		if (Moveset[i].is_empty==0){
 			std::cout << Moveset[i].start_square.piece_type << " @ " << Moveset[i].start_square.column << "," << Moveset[i].start_square.row << " -> " << Moveset[i].end_square.column << "," << Moveset[i].end_square.row << endl;
-		}
+		} else {break;}
 	}
 	std::cout << getNextEmptyMove() << endl;
 }
@@ -778,6 +788,7 @@ Square* ofApp::tsqr(int index, int xdev, int ydev){
 /*	-------------- OFAPPS FUNCTIONS --------------------- */
 //--------------------------------------------------------------
 void ofApp::setup(){
+	ofSetBackgroundAuto(false);
 	boardBottomLeft.set(80,600);
 	nextRight.set(squareSize + squareSpacing, 0);
 	nextAbove.set(0, -squareSize - squareSpacing); /* minus because y is flipped */
@@ -785,6 +796,8 @@ void ofApp::setup(){
 	ofBackground(128,128,128);
 	setupBoard();
 	loadImages();
+
+	updateState();
 }
 
 //--------------------------------------------------------------
@@ -794,10 +807,7 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	drawBoardNoPieces();
-	placePieces();
-	highlight();
-	placeMoveIndicator();
+	updateState();
 }
 
 //--------------------------------------------------------------
@@ -811,13 +821,16 @@ void ofApp::keyPressed(int key){
 			clearSelection();
 			break;
 		case 't':	//random
-			std::cout << "picking random square.." << endl;
-			pickRandFromPSBuffer(whiteToMove);
+			std::cout << "moves for " << whiteToMove << endl;
+			// printMoveset();
+			fillMoveset(whiteToMove);
+			// pickRandFromPSBuffer(whiteToMove);
 			break;
 		case 'b': // custom breakpoint
 			// std::cout << "breakpoint unset" << endl;
 			std::cout << "Registered B" << endl;
-			std::cout << inCheck(0) << " " << checkmate(0) << endl;
+			std::cout << "white " << inCheck(1) << " " << checkmate(1) << endl;
+			std::cout << "black " << inCheck(0) << " " << checkmate(0) << endl;
 			break;
 	}
 }

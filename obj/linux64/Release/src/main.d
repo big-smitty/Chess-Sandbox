@@ -520,7 +520,9 @@ obj/linux64/Release/src/main.o: \
  /home/noah/of_v0.11.2_linux64gcc6_release/libs/openFrameworks/3d/of3dUtils.h \
  /home/noah/of_v0.11.2_linux64gcc6_release/libs/openFrameworks/3d/ofCamera.h \
  /home/noah/of_v0.11.2_linux64gcc6_release/libs/openFrameworks/3d/ofEasyCam.h \
- /home/noah/of_v0.11.2_linux64gcc6_release/apps/myApps/Chess/src/ofApp.h
+ /home/noah/of_v0.11.2_linux64gcc6_release/apps/myApps/Chess/src/ofApp.h \
+ /home/noah/of_v0.11.2_linux64gcc6_release/apps/myApps/Chess/src/Board.h \
+ /home/noah/of_v0.11.2_linux64gcc6_release/apps/myApps/Chess/src/Square.h
 
 /home/noah/of_v0.11.2_linux64gcc6_release/libs/openFrameworks/ofMain.h:
 
@@ -1597,3 +1599,7 @@ obj/linux64/Release/src/main.o: \
 /home/noah/of_v0.11.2_linux64gcc6_release/libs/openFrameworks/3d/ofEasyCam.h:
 
 /home/noah/of_v0.11.2_linux64gcc6_release/apps/myApps/Chess/src/ofApp.h:
+
+/home/noah/of_v0.11.2_linux64gcc6_release/apps/myApps/Chess/src/Board.h:
+
+/home/noah/of_v0.11.2_linux64gcc6_release/apps/myApps/Chess/src/Square.h:

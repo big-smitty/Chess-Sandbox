@@ -15,7 +15,33 @@ class Board {
 		/* draws the squares to the screen, except for the pieces */
 		void drawSquares();
 
+		/* places an indicator showing whos move it is */
+		void placeMoveIndicator();
 
+		/* given index for squares array, return array[64] of ints where 0 if can't move there, 1 if piece can move there */
+		long long getPossibleMoves(int index);
+
+		/* takes a reference to a long long and an index, adds the correct value to reference */
+		void seton(long long *ref, int index, int xdev, int ydev);
+
+		/* return index from x and y, -1 if out of bounds */
+		int getSelf(int x, int y);
+
+		/* transform the index by the given amount. Return -1 if it's not valid, otherwise the index */
+		int transformBy(int index, int xdev, int ydev);
+
+		/* returns true if the transformed square is populated with an enemy piece */
+		bool isEnemy(int index, int xdev, int ydev);
+
+		/* returns true if the square is empty or occupied by an enemy piece, eg. a non-pawn can take there */
+		bool takeable(int index, int xdev, int ydev);
+		bool takeable(int index, int originalColor, int xdev, int ydev);
+
+		/* given parameters, keep moving in that direction until piece or wall. takeable piece returns index. otherwise returns -1 */
+		void recurs(int index, long long *ref, int originalColor, int xdev, int ydev);
+
+		/* given parameters, move once, call seton */
+		void nonrecurs(int index, long long *ref, int originalColor, int xdev, int ydev);
 
 
 		/* ============  PUBLIC VALUES  ============= */

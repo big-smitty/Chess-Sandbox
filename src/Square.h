@@ -23,8 +23,8 @@ class Square {
 		int index;
 		int column;
 		int row;
-		char piece_type = ' ';	/* can be ' ', ! (error), p, k, b, r, q, k */
-		int piece_color	= -1;	/* 1 is white, 0 is black, if has_piece is false then piece_color doesn't matter */
+		char piece_type 	= ' ';	/* can be ' ', ! (error), p, k, b, r, q, k */
+		int piece_color		= -1;	/* 1 is white, 0 is black, if has_piece is false then piece_color doesn't matter */
 
 		Square();
 

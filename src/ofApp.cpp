@@ -134,7 +134,9 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
 	std::cout << getClickedSquare(x,y) << endl;
-	std::cout << Playarea.getPossibleMoves(getClickedSquare(x,y)) << endl;
+	// std::cout << Playarea.getPossibleMoves(getClickedSquare(x,y)) << endl;
+	// Playarea.colorSquares(Playarea.getPossibleMoves(getClickedSquare(x,y)),'g');
+	std::cout << Playarea.takeable(getClickedSquare(x,y),1,1,1) << endl;
 }
 
 //--------------------------------------------------------------

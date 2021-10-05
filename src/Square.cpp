@@ -1,4 +1,11 @@
 #include "Square.h"
+
+ofColor black(50,50,50);
+ofColor white(230,230,230);
+ofColor green(0,168,107);
+ofColor yellow(255,211,0);
+ofColor red(184,15,10);
+
 Square::Square(){
 	}
 
@@ -43,4 +50,32 @@ void Square::resetPiece(){
 void Square::setPiece(char input_type, int input_color){
 	piece_type 	= input_type;
 	piece_color	= input_color;
+}
+
+void Square::setColor(char inColor){
+	switch(inColor){
+		case 'b':
+			color.set(50,50,50);
+			break;
+		case 'w':
+			color.set(230,230,230);
+			break;
+		case 'g':
+			color.set(0,168,107);
+			break;
+		case 'y':
+			color.set(255,211,0);
+			break;
+		case 'r':
+			color.set(184,15,10);
+			break;
+	}
+}
+
+void Square::resetColor(){
+	if (squareColor== 'b'){
+		color.set(50,50,50);
+	} else {
+		color.set(230,230,230);
+	}
 }

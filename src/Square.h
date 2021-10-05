@@ -15,6 +15,11 @@ class Square {
 		// set the values of the piece
 		void setPiece(char input_type, int input_color);
 
+		/* set the color of a square, b,w,g,r,y */
+		void setColor(char inColor);
+
+		/* reset the color of a square back to what it's supposed to be */
+		void resetColor();
 
 
 		/* ============  PUBLIC VALUES  ============= */

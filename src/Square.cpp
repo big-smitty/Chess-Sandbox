@@ -52,6 +52,12 @@ void Square::setPiece(char input_type, int input_color){
 	piece_color	= input_color;
 }
 
+void Square::empty(){
+	piece_type	= ' ';
+	piece_color	= -1;
+}
+
+
 void Square::setColor(char inColor){
 	switch(inColor){
 		case 'b':
@@ -77,5 +83,13 @@ void Square::resetColor(){
 		color.set(50,50,50);
 	} else {
 		color.set(230,230,230);
+	}
+}
+
+int Square::hasPiece(){
+	if (piece_type!=' '){
+		return (1);
+	} else {
+		return (0);
 	}
 }

@@ -7,7 +7,6 @@
 class Board {
 	public:
 		/* ============  PUBLIC METHODS  ============= */
-		void test();
 
 		/* reset the pieces to the original spots, call this before game */
 		void reset();
@@ -21,11 +20,22 @@ class Board {
 		/* given index for squares array, return array[64] of ints where 0 if can't move there, 1 if piece can move there */
 		long long getPossibleMoves(int index);
 
+		/* given index, and target square, move the target there. Includes castling handling, error checking */
+		void moveTo(Square &starting, Square &target);
+		void moveTo(int ix, int iy, int tx, int ty);
+		void moveTo(int iindex, int tindex);
+
 		/* given board long long, color '1' squares the toColor */
 		void colorSquares(long long squaresToColor, char toColor);
 
 		/* reset all the squares' color */
 		void resetSquaresColor();
+
+		/* given board long long, select the valued squares */
+		void selectSquares(long long squaresToSelect);
+
+		/* resets the 'selected' value of all squares back to 0 */
+		void clearSelection();
 
 		/* takes a reference to a long long and an index, adds the correct value to reference */
 		void seton(long long *ref, int index, int xdev, int ydev);
@@ -37,7 +47,7 @@ class Board {
 		int transformBy(int index, int xdev, int ydev);
 
 		/* returns true if the transformed square is populated with an enemy piece */
-		bool isEnemy(int index, int xdev, int ydev);
+		int isEnemy(int index, int xdev, int ydev);
 
 		/* returns true if the square is empty or occupied by an enemy piece, eg. a non-pawn can take there */
 		bool takeable(int index, int xdev, int ydev);
@@ -49,6 +59,9 @@ class Board {
 		/* given parameters, move once, call seton */
 		void nonrecurs(int index, long long *ref, int originalColor, int xdev, int ydev);
 
+		/* returns 1 if the index has a piece */
+		int hasPiece(int index);
+
 
 		/* ============  PUBLIC VALUES  ============= */
 		Square Squares[64];
@@ -58,6 +71,7 @@ class Board {
 		ofVec2f nextAbove;
 		int squareSize = 60;
 		int squareSpacing = 6;
+		int moveablePiece;
 
 		/* Movement flags. Set 1 if something happens */
 		int wk_flag 	= 0;

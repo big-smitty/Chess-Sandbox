@@ -8,12 +8,6 @@ Board::Board(){
 		reset();
 	}
 
-
-void Board::test(){
-	Squares[0].setup(4);
-	std::cout<<Squares[0].row << " " << Squares[0].column<<endl;
-}
-
 void Board::reset(){
 	for (int i=0; i<64; i++){
 		Squares[i].setup(i);
@@ -42,6 +36,7 @@ void Board::placeMoveIndicator(){
 long long Board::getPossibleMoves(int index){
 	long long return_int = 0;
 	// return_int += pow(2,index);
+	moveablePiece = index;
 	if (Squares[index].piece_type==' '){return (0);}
 	else if (Squares[index].piece_color==1){
 		switch(Squares[index].piece_type){
@@ -58,6 +53,9 @@ long long Board::getPossibleMoves(int index){
 				}
 				if (isEnemy(index,1,1)){
 					seton(&return_int,index,1,1);
+				}
+				if (((Squares[index].column)==ep_flag+1||(Squares[index].column)==ep_flag-1)&&(Squares[index].row)==4){
+					seton(&return_int,ep_flag+40,0,0);
 				}
 				break;
 			case 'n':
@@ -119,6 +117,9 @@ long long Board::getPossibleMoves(int index){
 				if (isEnemy(index,1,-1)){
 					seton(&return_int,index,1,-1);
 				}
+				if (((Squares[index].column)==ep_flag+1||(Squares[index].column)==ep_flag-1)&&(Squares[index].row)==4){
+					seton(&return_int,ep_flag+16,0,0);
+				}
 				break;
 			case 'n':
 				nonrecurs(index, &return_int, 0, 2, 1);
@@ -168,6 +169,20 @@ long long Board::getPossibleMoves(int index){
 	return (return_int);
 }
 
+void Board::moveTo(Square &starting, Square &target){
+	target.setPiece(starting.piece_type, starting.piece_color);
+	starting.empty();
+}
+
+void Board::moveTo(int ix, int iy, int tx, int ty){
+	moveTo(Squares[getSelf(ix,iy)],Squares[getSelf(tx,ty)]);
+}
+
+void Board::moveTo(int start, int target){
+	moveTo(Squares[start], Squares[target]);
+}
+
+
 void Board::colorSquares(long long squaresToColor, char toColor){
 	int j;
 	for (int i=0; i<64; i++){
@@ -180,6 +195,21 @@ void Board::resetSquaresColor(){
 	for (int i=0; i<64; i++){
 		Squares[i].resetColor();
 	}
+}
+
+void Board::selectSquares(long long squaresToSelect){
+	int j;
+	for (int i=0; i<64; i++){
+		j = 0 != (squaresToSelect & ((long long)1 << (63-i)));	// God im smart
+		if (j==1) {Squares[63-i].selected = 1;}
+	}
+}
+
+void Board::clearSelection(){
+	for (int i=0; i<64; i++){
+		Squares[i].selected = 0;
+	}
+	resetSquaresColor();
 }
 
 void Board::seton(long long *ref, int index, int xdev, int ydev){
@@ -201,15 +231,14 @@ int Board::transformBy(int index, int xdev, int ydev){
 	return(index+xdev+(ydev*8));
 }
 
-bool Board::isEnemy(int index, int xdev, int ydev){		// yucky code
-	if (Squares[index].piece_color==1){
-		if (Squares[transformBy(index,xdev,ydev)].piece_type!=' ' && Squares[transformBy(index,xdev,ydev)].piece_color==0){
-			return (true);
-		} else { return (false);}
-	} else {
-		if (Squares[transformBy(index,xdev,ydev)].piece_type!=' ' && Squares[transformBy(index,xdev,ydev)].piece_color==1){
-			return (true);
-		} else { return (false);}
+int Board::isEnemy(int index, int xdev, int ydev){
+	if (transformBy(index,xdev,ydev)==-1){	return(0);	}
+	else {
+		if (Squares[transformBy(index,xdev,ydev)].hasPiece() && Squares[transformBy(index,xdev,ydev)].piece_color==1-Squares[index].piece_color){
+			return (1);
+		} else {
+			return (0);
+		}
 	}
 }
 
@@ -224,20 +253,21 @@ int Board::takeable(int index, int originalColor, int xdev, int ydev){
 		return (1);
 	} else if (originalColor==0 && Squares[transformBy(index,xdev,ydev)].piece_color==1) {
 		return (1);
-	} else if (Squares[transformBy(index,xdev,ydev)].piece_type==' '){
+	} else if (!Squares[transformBy(index,xdev,ydev)].hasPiece()){
 		return (1);
 	} else {return(0);}
 }
 
 void Board::recurs(int index, long long *ref, int originalColor, int xdev, int ydev){
 	if (transformBy(index,xdev,ydev)!=-1){
-		if (takeable(index,originalColor,xdev,ydev)){
+		if (!Squares[transformBy(index,xdev,ydev)].hasPiece()){
+			*ref+=pow(2,transformBy(index,xdev,ydev));
+			recurs(transformBy(index,xdev,ydev), ref, originalColor,xdev,ydev);
+		} else if (takeable(index,originalColor,xdev,ydev)){
 			*ref+=pow(2,transformBy(index,xdev,ydev));
 			return;
 		} else if (Squares[transformBy(index,xdev,ydev)].piece_color==originalColor){
 			return;
-		} else {
-			recurs(transformBy(index,xdev,ydev), ref, originalColor,xdev,ydev);
 		}
 	} else {return;}
 }
@@ -248,4 +278,9 @@ void Board::nonrecurs(int index, long long *ref, int originalColor, int xdev, in
 			*ref+=pow(2,transformBy(index,xdev,ydev));
 		}
 	}
+}
+
+int Board::hasPiece(int index){
+	if (Squares[index].hasPiece()){return (1);}
+	else {return(0);}
 }

@@ -126,9 +126,7 @@ void ofApp::keyPressed(int key){
 			break;
 		case 'b': // custom breakpoint
 			std::cout << "b catch" << endl;
-			// Playarea.Squares[0].setPiece(Playarea.Squares[1].piece_type,Playarea.Squares[1].piece_color);
-			// Playarea.Squares[0].empty();
-			Playarea.moveTo(10,21);
+			std::cout << Playarea.ep_flag << endl;
 			break;
 	}
 }

@@ -117,7 +117,7 @@ long long Board::getPossibleMoves(int index){
 				if (isEnemy(index,1,-1)){
 					seton(&return_int,index,1,-1);
 				}
-				if (((Squares[index].column)==ep_flag+1||(Squares[index].column)==ep_flag-1)&&(Squares[index].row)==4){
+				if (((Squares[index].column)==ep_flag+1||(Squares[index].column)==ep_flag-1)&&(Squares[index].row)==3){
 					seton(&return_int,ep_flag+16,0,0);
 				}
 				break;
@@ -170,8 +170,31 @@ long long Board::getPossibleMoves(int index){
 }
 
 void Board::moveTo(Square &starting, Square &target){
+	// int xi = starting.column;
+	int yi = starting.row;
+	int x = target.column;
+	int y = target.row;
 	target.setPiece(starting.piece_type, starting.piece_color);
 	starting.empty();
+
+	/* en pipi handling, holy hell */
+	/* If the square behind the en-passant square if full of opp. color pawn (en passant happpend), remove the taken pawn */
+	if (y==5 && target.piece_color==1 && ep_flag==x){
+		Squares[getSelf(x,y-1)].empty();
+	}
+	if (y==2 && target.piece_color==0 && ep_flag==x){
+		Squares[getSelf(x,y+1)].empty();
+	}
+	ep_flag=-2;
+	/* if a double pawn move, set the ep_flag */
+	if (y==3 && yi==1 && target.piece_type=='p'){	// double pawn move white
+		if ((Squares[getSelf(x+1,y)].piece_color==0)&&(Squares[getSelf(x+1,y)].piece_type=='p')){	ep_flag=x;	}
+		if ((Squares[getSelf(x-1,y)].piece_color==0)&&(Squares[getSelf(x-1,y)].piece_type=='p')){	ep_flag=x;	}
+	}
+	if (y==4 && yi==6 && target.piece_type=='p'){	// double pawn move black
+		if ((Squares[getSelf(x+1,y)].piece_color==1)&&(Squares[getSelf(x+1,y)].piece_type=='p')){	ep_flag=x;	}
+		if ((Squares[getSelf(x-1,y)].piece_color==1)&&(Squares[getSelf(x-1,y)].piece_type=='p')){	ep_flag=x;	}
+	}
 }
 
 void Board::moveTo(int ix, int iy, int tx, int ty){
